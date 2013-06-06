@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Mark Diffs as Read
-// @version        0.0.2
+// @version        0.0.3
 // @description    Adds a "Mark as Read" toggle to diffs in Phabricator
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -55,10 +55,14 @@ injectStyles(
     'display: none;' +
   '}' +
   '.hide-icon {' +
+    'border: 1px solid transparent;' +
     'cursor: pointer;' +
-    'margin: -7px -3px;' +
-    'position: absolute;' +
+    'margin-right: 15px;' +
     'visibility: hidden;' +
+  '}' +
+  '.hideable-row .phabricator-flag-icon {' +
+    'position: absolute;' +
+    'margin-left: 25px;' +
   '}' +
   '.hideable-row:hover .hide-icon {' +
     'visibility: visible;' +
@@ -136,7 +140,7 @@ injectJS(function(global) {
 
   (function() {
     var submitControls = $(
-      '.aphront-list-filter-view-controls ' +
+      '.aphront-list-filter-view-content ' +
       '.aphront-form-control-submit ' +
       '.aphront-form-input'
     );
@@ -148,7 +152,7 @@ injectJS(function(global) {
           JX.$N(
             'label',
             {htmlFor: JX.DOM.uniqID(checkbox)},
-            'Show Read Diffs'
+            'Show Read Diffs '
           ),
           checkbox
         ])
@@ -164,8 +168,9 @@ injectJS(function(global) {
       JX.DOM.alterClass(row, 'hideable-row', true);
       var isHidden = hiddenDiffs[cells.id] &&
                      hiddenDiffs[cells.id] === cells.updated;
-      JX.DOM.setContent(
-        row.firstChild, // Empty cell, heh heh.
+
+      var firstCol = row.firstChild; // First cell, heh heh.
+      var hideLink =
         JX.$N('i', {
           className:
             'hide-icon ' + (isHidden ? 'icon-eye-close' : 'icon-eye-open'),
@@ -174,8 +179,14 @@ injectJS(function(global) {
             cells: cells,
             isHidden: isHidden
           }
-        })
-      );
+        });
+
+      var prevLink = JX.DOM.scry(firstCol, 'i', 'hide-link')[0];
+      if (prevLink) {
+        JX.DOM.replace(prevLink, hideLink);
+      } else {
+        JX.DOM.appendContent(firstCol, hideLink);
+      }
       JX.DOM.alterClass(row, 'hidden-row', isHidden);
     });
   }
