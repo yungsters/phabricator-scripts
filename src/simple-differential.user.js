@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.0.3
+// @version        0.0.4
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -125,6 +125,8 @@ injectJS(function(global) {
         simpleStatusNode,
         labelSpacerNode.cloneNode(true)
       ].forEach(function(node) {
+        // This class gets hidden on narrow viewports.
+        JX.DOM.alterClass(node, 'phabricator-object-item-icon-label', true);
         iconLabelNode.parentNode.insertBefore(node, iconLabelNode);
       });
     }
