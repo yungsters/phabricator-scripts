@@ -66,7 +66,9 @@ injectJS(function(global) {
   /* INIT */
 
   var statusToColor = {
+    'Abandoned': '#222',
     'Accepted': '#096',
+    'Needs Review': '#c96',
     'Needs Revision': '#a00'
   };
 
