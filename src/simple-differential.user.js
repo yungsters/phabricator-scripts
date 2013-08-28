@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.0.1
+// @version        0.0.2
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -63,8 +63,10 @@ injectJS(function(global) {
   /* INIT */
 
   var statusToColor = {
-    'Accepted': '#096',
-    'Needs Revision': '#a00'
+    'Abandoned': '#333333',
+    'Accepted': '#139543',
+    'Needs Review': '#e67e22',
+    'Needs Revision': '#c0392b'
   };
 
   $$('.phabricator-object-item').forEach(function(itemNode) {
