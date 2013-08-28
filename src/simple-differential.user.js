@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.0.1
+// @version        0.0.2
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -26,6 +26,9 @@ injectStyles(
   '}' +
   '.phabricator-has-tooltip {' +
     'cursor: default;' +
+  '}' +
+  '.phabricator-simple-item .phabricator-object-icon-pane {' +
+    'width: auto;' +
   '}' +
   '.phabricator-simple-item.phabricator-object-item {' +
     'margin-bottom: 0;' +
