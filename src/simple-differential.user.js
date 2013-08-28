@@ -63,10 +63,10 @@ injectJS(function(global) {
   /* INIT */
 
   var statusToColor = {
-    'Abandoned': '#333333',
-    'Accepted': '#139543',
-    'Needs Review': '#e67e22',
-    'Needs Revision': '#c0392b'
+    'Abandoned': '#222',
+    'Accepted': '#096',
+    'Needs Review': '#c96',
+    'Needs Revision': '#a00'
   };
 
   $$('.phabricator-object-item').forEach(function(itemNode) {
