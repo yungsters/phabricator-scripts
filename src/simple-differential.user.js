@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.0.4
+// @version        0.1.0
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -17,6 +17,28 @@ function injectStyles(styles) {
   style.innerHTML = styles;
   document.body.appendChild(style);
 }
+
+// Courtesy of BootstrapCDN.
+// injectCSS('//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css');
+var spriteURL = '//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/img/glyphicons-halflings.png';
+
+injectStyles(
+  '[class^="icon-"], [class*=" icon-"] {' +
+    'display: inline-block;' +
+    'width: 14px;' +
+    'height: 14px;' +
+    '*margin-right: .3em;' +
+    'line-height: 14px;' +
+    'vertical-align: text-top;' +
+    'background-image: url("' + spriteURL + '");' +
+    'background-position: 14px 14px;' +
+    'background-repeat: no-repeat;' +
+    'margin-top: 1px;' +
+  '}' +
+  '.icon-user {' +
+    'background-position: -168px 0;' +
+  '}'
+);
 
 injectStyles(
   '.phabricator-object-item-name .phabricator-object-item-byline {' +
@@ -42,7 +64,12 @@ injectStyles(
   '}' +
   '.phabricator-simple-item:last-child .phabricator-object-item-frame {' +
     'border-bottom-width: 1px;' +
+  '}' +
+  '.phabricator-simple-icon {' +
+    'margin-top: -1px;' +
+    'opacity: 0.5;' +
   '}'
+
 );
 
 injectJS(function(global) {
@@ -57,9 +84,13 @@ injectJS(function(global) {
     return JX.$A((start || document).querySelectorAll(selector));
   }
 
-  function setNodeTooltip(node, tooltip) {
+  function setNodeTooltip(node, tooltip, alignment) {
     JX.Stratcom.addSigil(node, 'has-tooltip');
-    JX.Stratcom.addData(node, {align: 'W', tip: tooltip});
+    JX.Stratcom.addData(node, {
+      align: alignment || 'W',
+      size: 300,
+      tip: tooltip
+    });
     JX.DOM.alterClass(node, 'phabricator-has-tooltip', true);
   }
 
@@ -78,6 +109,7 @@ injectJS(function(global) {
     var bylinesNode = $('.phabricator-object-item-bylines', itemNode);
     var contentNode = $('.phabricator-object-item-content', itemNode);
     var nameNode = $('.phabricator-object-item-name', itemNode);
+    var objNameNode = $('.phabricator-object-item-objname', itemNode);
     var iconLabelNode = $('.phabricator-object-item-icon-label', itemNode);
 
     JX.DOM.alterClass(itemNode, 'phabricator-simple-item', true);
@@ -100,6 +132,8 @@ injectJS(function(global) {
       }
     }
 
+    setNodeTooltip(objNameNode, itemStatus);
+
     var reviewerNames = [];
     var reviewersNode = attributeList[1];
     if (reviewersNode) {
@@ -110,24 +144,28 @@ injectJS(function(global) {
     }
 
     if (iconLabelNode) {
-      var labelSpacerNode = document.createElement('span');
-      labelSpacerNode.innerHTML = ' &middot; ';
+      var labelSpacerNode = JX.$N(
+        'span',
+        {className: 'phabricator-object-item-icon-label'},
+        JX.$H(' &middot; ')
+      );
 
-      var simpleReviewerNode = document.createElement('span');
-      simpleReviewerNode.textContent = reviewerNames.length + ' Reviewers';
-      setNodeTooltip(simpleReviewerNode, reviewerNames.join(', '));
+      var reviewerNode = JX.$N('span', ' ' + reviewerNames.length);
+      JX.DOM.prependContent(
+        reviewerNode,
+        JX.$N('span', {className: 'phabricator-simple-icon icon-user'})
+      );
+      setNodeTooltip(reviewerNode, reviewerNames.join(', '));
 
-      var simpleStatusNode = document.createElement('span');
-      simpleStatusNode.textContent = itemStatus;
-
-      [ simpleReviewerNode,
-        labelSpacerNode.cloneNode(true),
-        simpleStatusNode,
-        labelSpacerNode.cloneNode(true)
+      [ reviewerNode
       ].forEach(function(node) {
         // This class gets hidden on narrow viewports.
         JX.DOM.alterClass(node, 'phabricator-object-item-icon-label', true);
         iconLabelNode.parentNode.insertBefore(node, iconLabelNode);
+        iconLabelNode.parentNode.insertBefore(
+          labelSpacerNode.cloneNode(true),
+          iconLabelNode
+        );
       });
     }
 
