@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.1.0
+// @version        0.1.1
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -37,6 +37,9 @@ injectStyles(
   '}' +
   '.icon-user {' +
     'background-position: -168px 0;' +
+  '}' +
+  '.icon-gray {' +
+    'opacity: 0.5;' +
   '}'
 );
 
@@ -67,9 +70,8 @@ injectStyles(
   '}' +
   '.phabricator-simple-icon {' +
     'margin-top: -1px;' +
-    'opacity: 0.5;' +
+    'vertical-align: text-top;' +
   '}'
-
 );
 
 injectJS(function(global) {
@@ -122,25 +124,44 @@ injectJS(function(global) {
       nameNode.appendChild(bylineNode);
     }
 
+    var attributeListIndex = 0;
+
+    var pendingCommentNode = attributeList[attributeListIndex];
+    var pendingCommentIconNode = $('.icons-file-grey', pendingCommentNode);
+    if (pendingCommentIconNode) {
+      JX.DOM.alterClass(
+        pendingCommentIconNode,
+        'phabricator-simple-icon',
+        true
+      );
+      attributeListIndex++;
+    }
+
     var itemStatus = 'Unknown';
-    var itemStatusNode = attributeList[0];
+    var itemStatusNode = attributeList[attributeListIndex++];
     if (itemStatusNode) {
-      itemStatus = itemStatusNode.textContent;
+      // Sometimes the status node might have a spacer in it.
+      itemStatus = itemStatusNode.lastChild.textContent;
       var statusColor = statusToColor[itemStatus];
       if (statusColor) {
         itemNode.style.borderColor = statusColor;
       }
     }
-
     setNodeTooltip(objNameNode, itemStatus);
 
     var reviewerNames = [];
-    var reviewersNode = attributeList[1];
+    var reviewersNode = attributeList[attributeListIndex++];
     if (reviewersNode) {
       reviewerNames = $$('.phui-link-person', reviewersNode)
         .map(function(reviewerNode) {
           return reviewerNode.textContent;
         });
+    }
+
+    var loc = null;
+    var locAttributeNode = attributeList[attributeListIndex++];
+    if (locAttributeNode) {
+      loc = locAttributeNode.lastChild.textContent;
     }
 
     if (iconLabelNode) {
@@ -153,12 +174,21 @@ injectJS(function(global) {
       var reviewerNode = JX.$N('span', ' ' + reviewerNames.length);
       JX.DOM.prependContent(
         reviewerNode,
-        JX.$N('span', {className: 'phabricator-simple-icon icon-user'})
+        JX.$N('span', {
+          className: 'phabricator-simple-icon icon-gray icon-user'
+        })
       );
       setNodeTooltip(reviewerNode, reviewerNames.join(', '));
 
-      [ reviewerNode
+      var locNode = JX.$N('span', loc);
+
+      [ pendingCommentIconNode,
+        reviewerNode,
+        locNode
       ].forEach(function(node) {
+        if (!node) {
+          return;
+        }
         // This class gets hidden on narrow viewports.
         JX.DOM.alterClass(node, 'phabricator-object-item-icon-label', true);
         iconLabelNode.parentNode.insertBefore(node, iconLabelNode);
