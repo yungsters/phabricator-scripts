@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.1.1
+// @version        0.1.2
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -34,6 +34,9 @@ injectStyles(
     'background-position: 14px 14px;' +
     'background-repeat: no-repeat;' +
     'margin-top: 1px;' +
+  '}' +
+  '.icon-list-alt {' +
+    'background-position: -264px -24px;' +
   '}' +
   '.icon-user {' +
     'background-position: -168px 0;' +
@@ -163,10 +166,13 @@ injectJS(function(global) {
         });
     }
 
-    var loc = null;
+    var loc = '?';
     var locAttributeNode = attributeList[attributeListIndex++];
     if (locAttributeNode) {
-      loc = locAttributeNode.lastChild.textContent;
+      var locMatch = locAttributeNode.textContent.match(/\d+/);
+      if (locMatch) {
+        loc = locMatch[0];
+      }
     }
 
     if (iconLabelNode) {
@@ -185,7 +191,13 @@ injectJS(function(global) {
       );
       setNodeTooltip(reviewerNode, reviewerNames.join(', '));
 
-      var locNode = JX.$N('span', loc);
+      var locNode = JX.$N('span', ' ' + loc);
+      JX.DOM.prependContent(
+        locNode,
+        JX.$N('span', {
+          className: 'phabricator-simple-icon icon-gray icon-list-alt'
+        })
+      );
 
       [ pendingCommentIconNode,
         reviewerNode,
