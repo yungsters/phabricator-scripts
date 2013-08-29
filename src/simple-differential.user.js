@@ -138,7 +138,9 @@ injectJS(function(global) {
         rightSideNodes.push(unsubmittedCommentNode);
         rightSideNodes.push(labelSpacerNode.cloneNode(true));
       }
-      rightSideNodes.forEach(function(node) {
+      rightSideNodes.forEach(function(node) {\
+        // This class gets hidden on narrow viewports.
+        JX.DOM.alterClass(node, 'phabricator-object-item-icon-label', true);
         iconLabelNode.parentNode.insertBefore(node, iconLabelNode);
       });
     }
