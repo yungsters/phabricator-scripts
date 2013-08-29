@@ -98,6 +98,11 @@ injectJS(function(global) {
 
   /* INIT */
 
+  // Use `?complex` to disable these changes.
+  if ('complex' in JX.$U(global.location).getQueryParams()) {
+    return;
+  }
+
   var statusToColor = {
     'Abandoned': '#222',
     'Accepted': '#096',
