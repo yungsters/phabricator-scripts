@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.0.4
+// @version        0.0.1
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -26,9 +26,6 @@ injectStyles(
   '}' +
   '.phabricator-has-tooltip {' +
     'cursor: default;' +
-  '}' +
-  '.phabricator-simple-item .phabricator-object-icon-pane {' +
-    'width: auto;' +
   '}' +
   '.phabricator-simple-item.phabricator-object-item {' +
     'margin-bottom: 0;' +
@@ -66,9 +63,7 @@ injectJS(function(global) {
   /* INIT */
 
   var statusToColor = {
-    'Abandoned': '#222',
     'Accepted': '#096',
-    'Closed': '#069',
     'Needs Revision': '#a00'
   };
 
@@ -91,7 +86,12 @@ injectJS(function(global) {
     }
 
     var itemStatus = 'Unknown';
-    var itemStatusNode = attributeList[0];
+	var attributeListPos = 0;
+	var unsubmittedCommentNode = null;
+    if(attributeList.length == 4) {
+	  unsubmittedCommentNode = attributeList[attributeListPos++];
+    }
+    var itemStatusNode = attributeList[attributeListPos++];
     if (itemStatusNode) {
       itemStatus = itemStatusNode.textContent;
       var statusColor = statusToColor[itemStatus];
@@ -101,13 +101,16 @@ injectJS(function(global) {
     }
 
     var reviewerNames = [];
-    var reviewersNode = attributeList[1];
+    
+    var reviewersNode = attributeList[attributeListPos++];
     if (reviewersNode) {
       reviewerNames = $$('.phui-link-person', reviewersNode)
         .map(function(reviewerNode) {
           return reviewerNode.textContent;
         });
     }
+
+    var locNode = attributeList[attributeListPos++];
 
     if (iconLabelNode) {
       var labelSpacerNode = document.createElement('span');
@@ -120,13 +123,18 @@ injectJS(function(global) {
       var simpleStatusNode = document.createElement('span');
       simpleStatusNode.textContent = itemStatus;
 
-      [ simpleReviewerNode,
+      rightSideNodes = [ simpleReviewerNode,
         labelSpacerNode.cloneNode(true),
         simpleStatusNode,
-        labelSpacerNode.cloneNode(true)
-      ].forEach(function(node) {
-        // This class gets hidden on narrow viewports.
-        JX.DOM.alterClass(node, 'phabricator-object-item-icon-label', true);
+        labelSpacerNode.cloneNode(true),
+        locNode,
+        labelSpacerNode.cloneNode(true),
+      ];
+      if (unsubmittedCommentNode) {
+	    rightSideNodes.push(unsubmittedCommentNode);
+	    rightSideNodes.push(labelSpacerNode.cloneNode(true));
+	  }
+      rightSideNodes.forEach(function(node) {
         iconLabelNode.parentNode.insertBefore(node, iconLabelNode);
       });
     }
