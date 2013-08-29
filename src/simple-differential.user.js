@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.0.4
+// @version        0.0.5
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -78,6 +78,7 @@ injectJS(function(global) {
     var bylinesNode = $('.phabricator-object-item-bylines', itemNode);
     var contentNode = $('.phabricator-object-item-content', itemNode);
     var nameNode = $('.phabricator-object-item-name', itemNode);
+    var diffIdNode = $('.phabricator-object-item-objname', itemNode);
     var iconLabelNode = $('.phabricator-object-item-icon-label', itemNode);
 
     JX.DOM.alterClass(itemNode, 'phabricator-simple-item', true);
@@ -91,9 +92,17 @@ injectJS(function(global) {
     }
 
     var itemStatus = 'Unknown';
-    var itemStatusNode = attributeList[0];
+    var attributeListIndex = 0;
+    var unsubmittedCommentNode = null;
+    if (attributeList.length == 4) {
+      // This is a gross hack, but they're otherwise indistinguishable
+      // except by peeking at the contents and guessing :-(
+      unsubmittedCommentNode = attributeList[attributeListIndex++];
+    }
+    var itemStatusNode = attributeList[attributeListIndex++];
     if (itemStatusNode) {
-      itemStatus = itemStatusNode.textContent;
+      // Sometimes the status node might have a spacer in it.
+      itemStatus = itemStatusNode.lastChild.textContent;
       var statusColor = statusToColor[itemStatus];
       if (statusColor) {
         itemNode.style.borderColor = statusColor;
@@ -101,13 +110,15 @@ injectJS(function(global) {
     }
 
     var reviewerNames = [];
-    var reviewersNode = attributeList[1];
+    var reviewersNode = attributeList[attributeListIndex++];
     if (reviewersNode) {
       reviewerNames = $$('.phui-link-person', reviewersNode)
         .map(function(reviewerNode) {
           return reviewerNode.textContent;
         });
     }
+
+    var locNode = attributeList[attributeListIndex++];
 
     if (iconLabelNode) {
       var labelSpacerNode = document.createElement('span');
@@ -117,17 +128,25 @@ injectJS(function(global) {
       simpleReviewerNode.textContent = reviewerNames.length + ' Reviewers';
       setNodeTooltip(simpleReviewerNode, reviewerNames.join(', '));
 
+      setNodeTooltip(diffIdNode, itemStatus);
+
       var simpleStatusNode = document.createElement('span');
       simpleStatusNode.textContent = itemStatus;
 
       [ simpleReviewerNode,
-        labelSpacerNode.cloneNode(true),
-        simpleStatusNode,
-        labelSpacerNode.cloneNode(true)
+        locNode,
+        unsubmittedCommentNode
       ].forEach(function(node) {
+        if (!node) {
+          return;
+        }
         // This class gets hidden on narrow viewports.
         JX.DOM.alterClass(node, 'phabricator-object-item-icon-label', true);
         iconLabelNode.parentNode.insertBefore(node, iconLabelNode);
+	iconLabelNode.parentNode.insertBefore(
+          labelSpacerNode.cloneNode(true), 
+          iconLabelNode
+        );
       });
     }
 
