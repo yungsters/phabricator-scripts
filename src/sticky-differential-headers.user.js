@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name           Sticky Differential Headers
+// @name           Phabricator: Sticky Differential Headers
 // @version        1.1.0
 // @description    Changes filenames in Differential into sticky headers.
 // @match          https://secure.phabricator.com/*
