@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.0.1
+// @version        0.0.5
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -26,6 +26,9 @@ injectStyles(
   '}' +
   '.phabricator-has-tooltip {' +
     'cursor: default;' +
+  '}' +
+  '.phabricator-simple-item .phabricator-object-icon-pane {' +
+    'width: auto;' +
   '}' +
   '.phabricator-simple-item.phabricator-object-item {' +
     'margin-bottom: 0;' +
@@ -63,7 +66,9 @@ injectJS(function(global) {
   /* INIT */
 
   var statusToColor = {
+    'Abandoned': '#222',
     'Accepted': '#096',
+    'Closed': '#069',
     'Needs Revision': '#a00'
   };
 
@@ -86,10 +91,10 @@ injectJS(function(global) {
     }
 
     var itemStatus = 'Unknown';
-	var attributeListPos = 0;
-	var unsubmittedCommentNode = null;
+    var attributeListPos = 0;
+    var unsubmittedCommentNode = null;
     if(attributeList.length == 4) {
-	  unsubmittedCommentNode = attributeList[attributeListPos++];
+      unsubmittedCommentNode = attributeList[attributeListPos++];
     }
     var itemStatusNode = attributeList[attributeListPos++];
     if (itemStatusNode) {
@@ -101,7 +106,6 @@ injectJS(function(global) {
     }
 
     var reviewerNames = [];
-    
     var reviewersNode = attributeList[attributeListPos++];
     if (reviewersNode) {
       reviewerNames = $$('.phui-link-person', reviewersNode)
@@ -131,9 +135,9 @@ injectJS(function(global) {
         labelSpacerNode.cloneNode(true),
       ];
       if (unsubmittedCommentNode) {
-	    rightSideNodes.push(unsubmittedCommentNode);
-	    rightSideNodes.push(labelSpacerNode.cloneNode(true));
-	  }
+        rightSideNodes.push(unsubmittedCommentNode);
+        rightSideNodes.push(labelSpacerNode.cloneNode(true));
+      }
       rightSideNodes.forEach(function(node) {
         iconLabelNode.parentNode.insertBefore(node, iconLabelNode);
       });
