@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.1.3
+// @version        0.1.4
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -169,7 +169,7 @@ injectJS(function(global) {
     var loc = '?';
     var locAttributeNode = attributeList[attributeListIndex++];
     if (locAttributeNode) {
-      var locMatch = locAttributeNode.textContent.match(/\d+/);
+      var locMatch = locAttributeNode.textContent.match(/[0-9,]+/);
       if (locMatch) {
         loc = locMatch[0];
       }
