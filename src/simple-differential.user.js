@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.1.2
+// @version        0.1.3
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -23,7 +23,7 @@ function injectStyles(styles) {
 var spriteURL = '//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/img/glyphicons-halflings.png';
 
 injectStyles(
-  '[class^="icon-"], [class*=" icon-"] {' +
+  '.glyph {' +
     'display: inline-block;' +
     'width: 14px;' +
     'height: 14px;' +
@@ -35,13 +35,13 @@ injectStyles(
     'background-repeat: no-repeat;' +
     'margin-top: 1px;' +
   '}' +
-  '.icon-list-alt {' +
+  '.glyph-list-alt {' +
     'background-position: -264px -24px;' +
   '}' +
-  '.icon-user {' +
+  '.glyph-user {' +
     'background-position: -168px 0;' +
   '}' +
-  '.icon-gray {' +
+  '.glyph-gray {' +
     'opacity: 0.5;' +
   '}'
 );
@@ -186,7 +186,7 @@ injectJS(function(global) {
       JX.DOM.prependContent(
         reviewerNode,
         JX.$N('span', {
-          className: 'phabricator-simple-icon icon-gray icon-user'
+          className: 'phabricator-simple-icon glyph-gray glyph-user'
         })
       );
       setNodeTooltip(reviewerNode, reviewerNames.join(', '));
@@ -195,7 +195,7 @@ injectJS(function(global) {
       JX.DOM.prependContent(
         locNode,
         JX.$N('span', {
-          className: 'phabricator-simple-icon icon-gray icon-list-alt'
+          className: 'phabricator-simple-icon glyph-gray glyph-list-alt'
         })
       );
 
