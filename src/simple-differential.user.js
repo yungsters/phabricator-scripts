@@ -23,7 +23,7 @@ function injectStyles(styles) {
 var spriteURL = '//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/img/glyphicons-halflings.png';
 
 injectStyles(
-  '.glyph {' +
+  '[class^="glyph-"], [class*=" glyph-"] {' +
     'display: inline-block;' +
     'width: 14px;' +
     'height: 14px;' +
