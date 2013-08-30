@@ -176,6 +176,9 @@ injectJS(function(global) {
     }
 
     if (iconLabelNode) {
+      // This CSS style destroys it because it wants the whole thing to be an icon.
+      JX.DOM.alterClass(iconLabelNode.parentNode, 'icon-age-old', false);
+      JX.DOM.alterClass(iconLabelNode.parentNode, 'icon-age-stale', false);
       var labelSpacerNode = JX.$N(
         'span',
         {className: 'phabricator-object-item-icon-label'},
