@@ -169,7 +169,7 @@ injectJS(function(global) {
     var loc = '?';
     var locAttributeNode = attributeList[attributeListIndex++];
     if (locAttributeNode) {
-      var locMatch = locAttributeNode.textContent.match(/\d+/);
+      var locMatch = locAttributeNode.textContent.match(/[0-9,]+/);
       if (locMatch) {
         loc = locMatch[0];
       }
