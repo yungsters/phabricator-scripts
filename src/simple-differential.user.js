@@ -169,13 +169,16 @@ injectJS(function(global) {
     var loc = '?';
     var locAttributeNode = attributeList[attributeListIndex++];
     if (locAttributeNode) {
-      var locMatch = locAttributeNode.textContent.match(/\d+/);
+      var locMatch = locAttributeNode.textContent.match(/[0-9,]+/);
       if (locMatch) {
         loc = locMatch[0];
       }
     }
 
     if (iconLabelNode) {
+      // This CSS style destroys it because it wants the whole thing to be an icon.
+      JX.DOM.alterClass(iconLabelNode.parentNode, 'icon-age-old', false);
+      JX.DOM.alterClass(iconLabelNode.parentNode, 'icon-age-stale', false);
       var labelSpacerNode = JX.$N(
         'span',
         {className: 'phabricator-object-item-icon-label'},
