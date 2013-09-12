@@ -47,31 +47,31 @@ injectStyles(
 );
 
 injectStyles(
-  '.phabricator-object-item-name .phabricator-object-item-byline {' +
+  '.phui-object-item-name .phui-object-item-byline {' +
     'color: #777;' +
     'display: inline;' +
     'font-weight: normal;' +
   '}' +
-  '.phabricator-has-tooltip {' +
+  '.phui-has-tooltip {' +
     'cursor: default;' +
   '}' +
-  '.phabricator-simple-item .phabricator-object-icon-pane {' +
+  '.phui-simple-item .phui-object-icon-pane {' +
     'width: auto;' +
   '}' +
-  '.phabricator-simple-item.phabricator-object-item {' +
+  '.phui-simple-item.phui-object-item {' +
     'margin-bottom: 0;' +
   '}' +
-  '.phabricator-simple-item .phabricator-object-item-frame {' +
+  '.phui-simple-item .phui-object-item-frame {' +
     'border-bottom-width: 0;' +
     'min-height: 30px;' +
   '}' +
-  '.phabricator-simple-item:last-child {' +
+  '.phui-simple-item:last-child {' +
     'margin-bottom: 3px;' +
   '}' +
-  '.phabricator-simple-item:last-child .phabricator-object-item-frame {' +
+  '.phui-simple-item:last-child .phui-object-item-frame {' +
     'border-bottom-width: 1px;' +
   '}' +
-  '.phabricator-simple-icon {' +
+  '.phui-simple-icon {' +
     'margin-top: -1px;' +
     'vertical-align: text-top;' +
   '}'
@@ -96,7 +96,7 @@ injectJS(function(global) {
       size: 300,
       tip: tooltip
     });
-    JX.DOM.alterClass(node, 'phabricator-has-tooltip', true);
+    JX.DOM.alterClass(node, 'phui-has-tooltip', true);
   }
 
   /* INIT */
@@ -113,16 +113,16 @@ injectJS(function(global) {
     'Needs Revision': '#a00'
   };
 
-  $$('.phabricator-object-item').forEach(function(itemNode) {
-    var attributeList = $$('.phabricator-object-item-attribute', itemNode);
-    var bylineNode = $('.phabricator-object-item-byline', itemNode);
-    var bylinesNode = $('.phabricator-object-item-bylines', itemNode);
-    var contentNode = $('.phabricator-object-item-content', itemNode);
-    var nameNode = $('.phabricator-object-item-name', itemNode);
-    var objNameNode = $('.phabricator-object-item-objname', itemNode);
-    var iconLabelNode = $('.phabricator-object-item-icon-label', itemNode);
+  $$('.phui-object-item').forEach(function(itemNode) {
+    var attributeList = $$('.phui-object-item-attribute', itemNode);
+    var bylineNode = $('.phui-object-item-byline', itemNode);
+    var bylinesNode = $('.phui-object-item-bylines', itemNode);
+    var contentNode = $('.phui-object-item-content', itemNode);
+    var nameNode = $('.phui-object-item-name', itemNode);
+    var objNameNode = $('.phui-object-item-objname', itemNode);
+    var iconLabelNode = $('.phui-object-item-icon-label', itemNode);
 
-    JX.DOM.alterClass(itemNode, 'phabricator-simple-item', true);
+    JX.DOM.alterClass(itemNode, 'phui-simple-item', true);
 
     if (bylinesNode) {
       bylinesNode.parentNode.removeChild(bylinesNode);
@@ -139,7 +139,7 @@ injectJS(function(global) {
     if (pendingCommentIconNode) {
       JX.DOM.alterClass(
         pendingCommentIconNode,
-        'phabricator-simple-icon',
+        'phui-simple-icon',
         true
       );
       attributeListIndex++;
@@ -178,7 +178,7 @@ injectJS(function(global) {
     if (iconLabelNode) {
       var labelSpacerNode = JX.$N(
         'span',
-        {className: 'phabricator-object-item-icon-label'},
+        {className: 'phui-object-item-icon-label'},
         JX.$H(' &middot; ')
       );
 
@@ -186,7 +186,7 @@ injectJS(function(global) {
       JX.DOM.prependContent(
         reviewerNode,
         JX.$N('span', {
-          className: 'phabricator-simple-icon glyph-gray glyph-user'
+          className: 'phui-simple-icon glyph-gray glyph-user'
         })
       );
       setNodeTooltip(reviewerNode, reviewerNames.join(', '));
@@ -195,7 +195,7 @@ injectJS(function(global) {
       JX.DOM.prependContent(
         locNode,
         JX.$N('span', {
-          className: 'phabricator-simple-icon glyph-gray glyph-list-alt'
+          className: 'phui-simple-icon glyph-gray glyph-list-alt'
         })
       );
 
@@ -207,7 +207,7 @@ injectJS(function(global) {
           return;
         }
         // This class gets hidden on narrow viewports.
-        JX.DOM.alterClass(node, 'phabricator-object-item-icon-label', true);
+        JX.DOM.alterClass(node, 'phui-object-item-icon-label', true);
         iconLabelNode.parentNode.insertBefore(node, iconLabelNode);
         iconLabelNode.parentNode.insertBefore(
           labelSpacerNode.cloneNode(true),
