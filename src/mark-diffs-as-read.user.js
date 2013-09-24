@@ -70,14 +70,14 @@ injectStyles(
   '.hide-control {' +
     'float: right;' +
     'line-height: 25px;' +
-    'margin: 0.5em 0 0;' +
+    'margin-left: 0.5em;' +
   '}' +
   '.hide-control input {' +
     'display: inline-block;' +
     'width: auto;' +
   '}' +
   '.show-hidden-rows .hidden-row {' +
-    'display: table-row;' +
+    'display: block;' +
     'opacity: 0.5;' +
   '}' +
   '.show-hidden-rows .hide-icon {' +
@@ -97,32 +97,6 @@ injectJS(function(global) {
     return JX.$A((start || document).querySelectorAll(selector));
   }
 
-  function forEachAphrontTableRow(handler) {
-    $$('.aphront-table-view').forEach(function(table) {
-      var rows = JX.DOM.scry(table, 'tr');
-
-      var labelToColIndex = {};
-      JX.DOM.scry(rows.shift(), 'th').forEach(function(th, index) {
-        var label = th.innerHTML.toLowerCase();
-        if (label) {
-          labelToColIndex[label] = index;
-        }
-      });
-
-      rows.forEach(function(tr, index) {
-        if (tr.className === 'no-data') {
-          return;
-        }
-        var cells = JX.DOM.scry(tr, 'td');
-        var labelToCells = {};
-        for (var label in labelToColIndex) {
-          labelToCells[label] = cells[labelToColIndex[label]].innerHTML;
-        }
-        handler(labelToCells, tr, index);
-      });
-    });
-  }
-
   var ScriptStorage = global.ScriptStorage = {
     get: function(key) {
       var item;
@@ -140,13 +114,11 @@ injectJS(function(global) {
 
   (function() {
     var submitControls = $(
-      '.aphront-list-filter-view-content ' +
-      '.aphront-form-control-submit ' +
-      '.aphront-form-input'
+      '.aphront-list-filter-view .aphront-list-filter-reveal'
     );
     if (submitControls) {
       var checkbox = JX.$N('input', {type: 'checkbox', sigil: 'toggle-hide'});
-      JX.DOM.appendContent(
+      JX.DOM.prependContent(
         submitControls,
         JX.$N('div', {className: 'hide-control'}, [
           JX.$N(
@@ -163,42 +135,59 @@ injectJS(function(global) {
   function flushStorageToView() {
     var hiddenDiffs = ScriptStorage.get('hiddendiffs');
 
-    forEachAphrontTableRow(function(cells, row, index) {
-      if (!cells.id || !cells.updated) return;
-      JX.DOM.alterClass(row, 'hideable-row', true);
-      var isHidden = hiddenDiffs[cells.id] &&
-                     hiddenDiffs[cells.id] === cells.updated;
+    $$('.phui-object-item-list-view').forEach(function(listView) {
+      var rows = JX.DOM.scry(listView, 'li');
 
-      var firstCol = row.firstChild; // First cell, heh heh.
-      var hideLink =
-        JX.$N('i', {
-          className:
-            'hide-icon ' + (isHidden ? 'icon-eye-close' : 'icon-eye-open'),
-          sigil: 'hide-link',
-          meta: {
-            cells: cells,
-            isHidden: isHidden
-          }
-        });
+      rows.forEach(function(row, index) {
+        var itemNameNode = $$('.phui-object-item-name', row)[0];
+        var diffIDNode = $$('.phui-object-item-objname', row)[0];
 
-      var prevLink = JX.DOM.scry(firstCol, 'i', 'hide-link')[0];
-      if (prevLink) {
-        JX.DOM.replace(prevLink, hideLink);
-      } else {
-        JX.DOM.appendContent(firstCol, hideLink);
-      }
-      JX.DOM.alterClass(row, 'hidden-row', isHidden);
+        var timeNodes = $$('.phui-object-item-icon-label', row);
+        var timeNode = timeNodes[timeNodes.length - 1];
+
+        if (!timeNode || !diffIDNode) return;
+
+        JX.DOM.alterClass(row, 'hideable-row', true);
+
+        var cellID = diffIDNode.innerHTML;
+        var timeString = timeNode.innerHTML;
+        var isHidden =
+          hiddenDiffs[cellID] && hiddenDiffs[cellID] === timeString;
+
+        var hideLink =
+          JX.$N('i', {
+            className:
+              'hide-icon ' + (isHidden ? 'icon-eye-close' : 'icon-eye-open'),
+            sigil: 'hide-link',
+            meta: {
+              isHidden: isHidden,
+              cellID: cellID,
+              time: timeString
+            }
+          });
+
+        var prevLink = JX.DOM.scry(itemNameNode, 'i', 'hide-link')[0];
+        if (prevLink) {
+          JX.DOM.replace(prevLink, hideLink);
+        } else {
+          JX.DOM.prependContent(itemNameNode, hideLink);
+        }
+        JX.DOM.alterClass(row, 'hidden-row', isHidden);
+      });
     });
   }
 
   JX.Stratcom.listen('mousedown', 'hide-link', function(event) {
-    var cells = event.getNodeData('hide-link').cells;
+    var hideLink = event.getNodeData('hide-link');
+    var cellID = hideLink.cellID;
+    var updatedTime = hideLink.time;
+
     var hiddenDiffs = ScriptStorage.get('hiddendiffs');
 
-    if (hiddenDiffs[cells.id] && hiddenDiffs[cells.id] === cells.updated) {
-      delete hiddenDiffs[cells.id];
+    if (hiddenDiffs[cellID] && hiddenDiffs[cellID] === updatedTime) {
+      delete hiddenDiffs[cellID];
     } else {
-      hiddenDiffs[cells.id] = cells.updated;
+      hiddenDiffs[cellID] = updatedTime;
     }
 
     ScriptStorage.set('hiddendiffs', hiddenDiffs);
