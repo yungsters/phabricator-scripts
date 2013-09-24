@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.1.4
+// @version        0.1.5
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -23,7 +23,7 @@ function injectStyles(styles) {
 var spriteURL = '//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/img/glyphicons-halflings.png';
 
 injectStyles(
-  '[class^="glyph-"], [class*=" glyph-"] {' +
+  '.glyph {' +
     'display: inline-block;' +
     'width: 14px;' +
     'height: 14px;' +
@@ -35,13 +35,13 @@ injectStyles(
     'background-repeat: no-repeat;' +
     'margin-top: 1px;' +
   '}' +
-  '.glyph-list-alt {' +
+  '.glyph.glyph-list-alt {' +
     'background-position: -264px -24px;' +
   '}' +
-  '.glyph-user {' +
+  '.glyph.glyph-user {' +
     'background-position: -168px 0;' +
   '}' +
-  '.glyph-gray {' +
+  '.glyph.glyph-gray {' +
     'opacity: 0.5;' +
   '}'
 );
@@ -59,19 +59,18 @@ injectStyles(
     'width: auto;' +
   '}' +
   '.phui-simple-item.phui-object-item {' +
-    'margin-bottom: 0;' +
+    'margin-bottom: -1px;' +
   '}' +
   '.phui-simple-item .phui-object-item-frame {' +
-    'border-bottom-width: 0;' +
     'min-height: 30px;' +
   '}' +
   '.phui-simple-item:last-child {' +
     'margin-bottom: 3px;' +
   '}' +
   '.phui-simple-item:last-child .phui-object-item-frame {' +
-    'border-bottom-width: 1px;' +
+    'margin-bottom: 0;' +
   '}' +
-  '.phui-simple-icon {' +
+  '.phui-object-item-icon-label .glyph {' +
     'margin-top: -1px;' +
     'vertical-align: text-top;' +
   '}'
@@ -137,11 +136,6 @@ injectJS(function(global) {
     var pendingCommentNode = attributeList[attributeListIndex];
     var pendingCommentIconNode = $('.icons-file-grey', pendingCommentNode);
     if (pendingCommentIconNode) {
-      JX.DOM.alterClass(
-        pendingCommentIconNode,
-        'phui-simple-icon',
-        true
-      );
       attributeListIndex++;
     }
 
@@ -186,7 +180,7 @@ injectJS(function(global) {
       JX.DOM.prependContent(
         reviewerNode,
         JX.$N('span', {
-          className: 'phui-simple-icon glyph-gray glyph-user'
+          className: 'glyph glyph-gray glyph-user'
         })
       );
       setNodeTooltip(reviewerNode, reviewerNames.join(', '));
@@ -195,7 +189,7 @@ injectJS(function(global) {
       JX.DOM.prependContent(
         locNode,
         JX.$N('span', {
-          className: 'phui-simple-icon glyph-gray glyph-list-alt'
+          className: 'glyph glyph-gray glyph-list-alt'
         })
       );
 

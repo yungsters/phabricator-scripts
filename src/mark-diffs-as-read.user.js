@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Mark Diffs as Read
-// @version        0.0.3
+// @version        0.1.0
 // @description    Adds a "Mark as Read" toggle to diffs in Phabricator
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -10,13 +10,6 @@ function injectJS(callback) {
   var script = document.createElement('script');
   script.textContent = '(' + callback.toString() + ')(window);';
   document.body.appendChild(script);
-}
-
-function injectCSS(href) {
-  var link = document.createElement('link');
-  link.setAttribute('href', href);
-  link.setAttribute('rel', 'stylesheet');
-  document.head.appendChild(link);
 }
 
 function injectStyles(styles) {
@@ -30,7 +23,7 @@ function injectStyles(styles) {
 var spriteURL = '//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/img/glyphicons-halflings.png';
 
 injectStyles(
-  '[class^="icon-"], [class*=" icon-"] {' +
+  '.glyph {' +
     'display: inline-block;' +
     'width: 14px;' +
     'height: 14px;' +
@@ -42,11 +35,14 @@ injectStyles(
     'background-repeat: no-repeat;' +
     'margin-top: 1px;' +
   '}' +
-  '.icon-eye-close {' +
+  '.glyph.glyph-eye-close {' +
     'background-position: -120px -120px;' +
   '}' +
-  '.icon-eye-open {' +
+  '.glyph.glyph-eye-open {' +
     'background-position: -96px -120px;' +
+  '}' +
+  '.glyph.glyph-gray {' +
+    'opacity: 0.5;' +
   '}'
 );
 
@@ -54,23 +50,17 @@ injectStyles(
   '.hidden-row {' +
     'display: none;' +
   '}' +
-  '.hide-icon {' +
+  '.phui-object-item-icon-label .glyph.hide-icon {' +
     'border: 1px solid transparent;' +
     'cursor: pointer;' +
-    'margin-right: 15px;' +
-    'visibility: hidden;' +
-  '}' +
-  '.hideable-row .phabricator-flag-icon {' +
-    'position: absolute;' +
-    'margin-left: 25px;' +
-  '}' +
-  '.hideable-row:hover .hide-icon {' +
-    'visibility: visible;' +
+    'margin: -2px 0 0 4px;' +
+    'vertical-align: text-top;' +
   '}' +
   '.hide-control {' +
-    'float: right;' +
+    'color: #74777D;' +
     'line-height: 25px;' +
-    'margin-left: 0.5em;' +
+    'position: absolute;' +
+    'right: 33px;' +
   '}' +
   '.hide-control input {' +
     'display: inline-block;' +
@@ -138,26 +128,33 @@ injectJS(function(global) {
     $$('.phui-object-item-list-view').forEach(function(listView) {
       var rows = JX.DOM.scry(listView, 'li');
 
-      rows.forEach(function(row, index) {
-        var itemNameNode = $$('.phui-object-item-name', row)[0];
+      rows.filter(function(row) {
+        return row.parentNode === listView;
+      }).forEach(function(row, index) {
         var diffIDNode = $$('.phui-object-item-objname', row)[0];
+        var timeNode = JX.DOM.scry(row, 'span', 'time-label')[0];
 
-        var timeNodes = $$('.phui-object-item-icon-label', row);
-        var timeNode = timeNodes[timeNodes.length - 1];
+        if (!timeNode) {
+          var labelNodes = $$('.phui-object-item-icon-label', row);
+          timeNode = labelNodes[labelNodes.length - 1];
+          JX.Stratcom.addSigil(timeNode, 'time-label');
+        }
 
-        if (!timeNode || !diffIDNode) return;
+        if (!timeNode || !diffIDNode) {
+          return;
+        }
 
-        JX.DOM.alterClass(row, 'hideable-row', true);
-
-        var cellID = diffIDNode.innerHTML;
-        var timeString = timeNode.innerHTML;
+        var cellID = diffIDNode.textContent;
+        var timeString = timeNode.textContent;
         var isHidden =
           hiddenDiffs[cellID] && hiddenDiffs[cellID] === timeString;
 
-        var hideLink =
+        var hideLinkNode =
           JX.$N('i', {
             className:
-              'hide-icon ' + (isHidden ? 'icon-eye-close' : 'icon-eye-open'),
+              'hide-icon glyph glyph-gray ' + (
+                isHidden ? 'glyph-eye-close' : 'glyph-eye-open'
+              ),
             sigil: 'hide-link',
             meta: {
               isHidden: isHidden,
@@ -166,11 +163,17 @@ injectJS(function(global) {
             }
           });
 
-        var prevLink = JX.DOM.scry(itemNameNode, 'i', 'hide-link')[0];
+        var labelContainerNode = timeNode.parentNode;
+        var prevLink = JX.DOM.scry(labelContainerNode, 'i', 'hide-link')[0];
         if (prevLink) {
-          JX.DOM.replace(prevLink, hideLink);
+          JX.DOM.replace(prevLink, hideLinkNode);
         } else {
-          JX.DOM.prependContent(itemNameNode, hideLink);
+          var hideLabelNode = JX.$N(
+            'span',
+            {className: 'phui-object-item-icon-label'},
+            hideLinkNode
+          );
+          JX.DOM.appendContent(labelContainerNode, hideLabelNode);
         }
         JX.DOM.alterClass(row, 'hidden-row', isHidden);
       });
