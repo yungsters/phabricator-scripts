@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.1.5
+// @version        0.1.6
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -140,13 +140,17 @@ injectJS(function(global) {
     }
 
     var itemStatus = 'Unknown';
-    var itemStatusNode = attributeList[attributeListIndex++];
+    var itemStatusNode = attributeList[attributeListIndex];
     if (itemStatusNode) {
       // Sometimes the status node might have a spacer in it.
-      itemStatus = itemStatusNode.lastChild.textContent;
-      var statusColor = statusToColor[itemStatus];
-      if (statusColor) {
-        itemNode.style.borderColor = statusColor;
+      var maybeItemStatus = itemStatusNode.lastChild;
+      if (maybeItemStatus.nodeType === Node.TEXT_NODE) {
+        itemStatus = maybeItemStatus.textContent;
+        var statusColor = statusToColor[itemStatus];
+        if (statusColor) {
+          itemNode.style.borderColor = statusColor;
+        }
+        attributeListIndex++;
       }
     }
     setNodeTooltip(objNameNode, itemStatus);
