@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Mark Diffs as Read
-// @version        0.4.0
+// @version        0.4.1
 // @description    Adds a "Mark as Read" toggle to diffs in Phabricator
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -92,19 +92,17 @@ injectJS(function(global) {
 
   var ScriptStorage = global.ScriptStorage = {
     subscribe: function(key, callback) {
-      var prevHash = localStorage.getItem(key);
-      var interval = setInterval(function() {
-        var nextHash = localStorage.getItem(key);
-        if (prevHash !== nextHash) {
-          callback();
-          prevHash = nextHash;
+      var handleStorageChange = function(event) {
+        if (event.key === key) {
+          callback(event);
         }
-      }, 1000);
+      };
+      window.addEventListener('storage', handleStorageChange, false);
       return {
         unsubscribe: function() {
-          if (interval) {
-            clearInterval(interval);
-            interval = null;
+          if (handleStorageChange) {
+            window.removeEventListener('storage', handleStorageChange, false);
+            handleStorageChange = null;
           }
         }
       };
