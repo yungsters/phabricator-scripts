@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Mark Diffs as Read
-// @version        0.3.0
+// @version        0.3.1
 // @description    Adds a "Mark as Read" toggle to diffs in Phabricator
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -203,9 +203,13 @@ injectJS(function(global) {
             },
               JX.$N('div', {
                 className: 'aphront-error-view-body'
-              },
-                'All revisions are marked as read.'
-              )
+              }, [
+                'All revisions are marked as ',
+                JX.$N('i', {
+                  className: 'hide-icon glyph glyph-gray glyph-eye-close'
+                }),
+                ' read.'
+              ])
             )
           ]);
         }
