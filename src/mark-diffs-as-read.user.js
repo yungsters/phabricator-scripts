@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Mark Diffs as Read
-// @version        0.1.0
+// @version        0.1.1
 // @description    Adds a "Mark as Read" toggle to diffs in Phabricator
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -136,8 +136,10 @@ injectJS(function(global) {
 
         if (!timeNode) {
           var labelNodes = $$('.phui-object-item-icon-label', row);
-          timeNode = labelNodes[labelNodes.length - 1];
-          JX.Stratcom.addSigil(timeNode, 'time-label');
+          if (labelNodes.length) {
+            timeNode = labelNodes[labelNodes.length - 1];
+            JX.Stratcom.addSigil(timeNode, 'time-label');
+          }
         }
 
         if (!timeNode || !diffIDNode) {
