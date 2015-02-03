@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.1.7
+// @version        0.1.8
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -132,6 +132,15 @@ injectJS(function(global) {
     }
 
     var attributeListIndex = 0;
+
+    // Filter out the "Project" attribute.
+    attributeList = attributeList.filter(function(attributeNode) {
+      var maybeProject = attributeNode.lastChild;
+      if (maybeProject.nodeType === Node.TEXT_NODE) {
+        return !maybeProject.textContent.match(/^Project: /);
+      }
+      return true;
+    });
 
     var pendingCommentNode = attributeList[attributeListIndex];
     var pendingCommentIconNode = $('.icons-file-grey', pendingCommentNode);
