@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.1.6
+// @version        0.1.7
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -100,8 +100,8 @@ injectJS(function(global) {
 
   /* INIT */
 
-  // Use `?complex` to disable these changes.
-  if ('complex' in JX.$U(global.location).getQueryParams()) {
+  // Use `#complex` to disable these changes.
+  if (global.location.hash === '#complex') {
     return;
   }
 
