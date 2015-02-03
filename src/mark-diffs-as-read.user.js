@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Mark Diffs as Read
-// @version        0.1.1
+// @version        0.2.0
 // @description    Adds a "Mark as Read" toggle to diffs in Phabricator
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -125,6 +125,9 @@ injectJS(function(global) {
   function flushStorageToView() {
     var hiddenDiffs = ScriptStorage.get('hiddendiffs');
 
+    /**
+     * List View
+     */
     $$('.phui-object-item-list-view').forEach(function(listView) {
       var rows = JX.DOM.scry(listView, 'li');
 
@@ -179,6 +182,51 @@ injectJS(function(global) {
         }
         JX.DOM.alterClass(row, 'hidden-row', isHidden);
       });
+    });
+
+    /**
+     * Diff View
+     */
+    $$('.phui-header-subheader').forEach(function(headerNode) {
+      var diffIDNode = $$('.phabricator-last-crumb .phabricator-crumb-name')[0];
+      var timeContainerNodes = $$('.phui-timeline-view .phui-timeline-extra');
+      var timeContainerNode = timeContainerNodes[timeContainerNodes.length - 1];
+      var timeNode = timeContainerNode.lastChild;
+
+      if (!timeNode || !diffIDNode) {
+        return;
+      }
+
+      var cellID = diffIDNode.textContent;
+      var timeString = timeNode.textContent;
+      var isHidden =
+        hiddenDiffs[cellID] && hiddenDiffs[cellID] === timeString;
+
+      var hideLinkNode =
+        JX.$N('a', {
+          className: 'mll policy-link',
+          sigil: 'hide-link',
+          meta: {
+            isHidden: isHidden,
+            cellID: cellID,
+            time: timeString
+          }
+        }, [
+          JX.$N('i', {
+            className:
+              'msr hide-icon glyph glyph-gray ' + (
+                isHidden ? 'glyph-eye-close' : 'glyph-eye-open'
+              )
+          }),
+          isHidden ? 'Read' : 'Unread'
+        ]);
+
+      var prevLink = JX.DOM.scry(headerNode, 'a', 'hide-link')[0];
+      if (prevLink) {
+        JX.DOM.replace(prevLink, hideLinkNode);
+      } else {
+        JX.DOM.appendContent(headerNode, hideLinkNode);
+      }
     });
   }
 
