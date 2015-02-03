@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Mark Diffs as Read
-// @version        0.2.0
+// @version        0.3.0
 // @description    Adds a "Mark as Read" toggle to diffs in Phabricator
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -72,6 +72,9 @@ injectStyles(
   '}' +
   '.show-hidden-rows .hide-icon {' +
     'visibility: visible;' +
+  '}' +
+  '.show-hidden-rows .all-hidden {' +
+    'display: none' +
   '}'
 );
 
@@ -131,6 +134,8 @@ injectJS(function(global) {
     $$('.phui-object-item-list-view').forEach(function(listView) {
       var rows = JX.DOM.scry(listView, 'li');
 
+      var isEmpty = true;
+
       rows.filter(function(row) {
         return row.parentNode === listView;
       }).forEach(function(row, index) {
@@ -153,6 +158,10 @@ injectJS(function(global) {
         var timeString = timeNode.textContent;
         var isHidden =
           hiddenDiffs[cellID] && hiddenDiffs[cellID] === timeString;
+
+        if (!isHidden) {
+          isEmpty = false;
+        }
 
         var hideLinkNode =
           JX.$N('i', {
@@ -182,6 +191,30 @@ injectJS(function(global) {
         }
         JX.DOM.alterClass(row, 'hidden-row', isHidden);
       });
+
+      var emptyNode = $$('.phui-object-item-empty', listView)[0];
+      if (isEmpty) {
+        if (!emptyNode) {
+          emptyNode = JX.$N('li', {
+            className: 'all-hidden phui-object-item-empty'
+          }, [
+            JX.$N('div', {
+              className: 'aphront-error-view aphront-error-severity-nodata'
+            },
+              JX.$N('div', {
+                className: 'aphront-error-view-body'
+              },
+                'All revisions are marked as read.'
+              )
+            )
+          ]);
+        }
+        JX.DOM.appendContent(listView, emptyNode);
+      } else {
+        if (emptyNode) {
+          JX.DOM.remove(emptyNode);
+        }
+      }
     });
 
     /**
