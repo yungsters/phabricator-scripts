@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.1.9
+// @version        0.1.10
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -58,7 +58,7 @@ injectStyles(
   '.phui-simple-item .phui-object-icon-pane {' +
     'width: auto;' +
   '}' +
-  '.phui-simple-item.phui-object-item {' +
+  '.phui-simple-item.phui-object-item.phui-object-item {' +
     'margin-bottom: -1px;' +
   '}' +
   '.phui-simple-item.phui-object-item .phui-object-item-frame {' +
