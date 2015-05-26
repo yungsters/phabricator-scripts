@@ -73,8 +73,19 @@ injectStyles(
   '.show-hidden-rows .hide-icon {' +
     'visibility: visible;' +
   '}' +
+  '.all-hidden-view {' +
+    'border: 1px solid #c7ccd9;' +
+    'border-bottom: 1px solid #a1a6b0;' +
+    'background-color: #fff;' +
+    'color: #6b748c;' +
+    'margin: 4px 0 8px 0;' +
+  '}' +
+  '.all-hidden-view-body {' +
+    'color: #6b748c;' +
+    'padding: 12px;' +
+  '}' +
   '.show-hidden-rows .all-hidden {' +
-    'display: none' +
+    'display: none;' +
   '}'
 );
 
@@ -150,6 +161,7 @@ injectJS(function(global) {
     $$('.phui-object-item-list-view').forEach(function(listView) {
       var rows = JX.DOM.scry(listView, 'li');
 
+      var hasRows = false;
       var isEmpty = true;
 
       rows.filter(function(row) {
@@ -178,6 +190,7 @@ injectJS(function(global) {
         if (!isHidden) {
           isEmpty = false;
         }
+        hasRows = true;
 
         var hideLinkNode =
           JX.$N('i', {
@@ -208,17 +221,17 @@ injectJS(function(global) {
         JX.DOM.alterClass(row, 'hidden-row', isHidden);
       });
 
-      var emptyNode = $$('.phui-object-item-empty', listView)[0];
-      if (isEmpty) {
+      var emptyNode = $$('.all-hidden', listView)[0];
+      if (isEmpty && hasRows) {
         if (!emptyNode) {
           emptyNode = JX.$N('li', {
-            className: 'all-hidden phui-object-item-empty'
+            className: 'all-hidden phabricatordefault-li'
           }, [
             JX.$N('div', {
-              className: 'aphront-error-view aphront-error-severity-nodata'
+              className: 'all-hidden-view phabricatordefault-div'
             },
               JX.$N('div', {
-                className: 'aphront-error-view-body'
+                className: 'all-hidden-view-body phabricatordefault-div'
               }, [
                 'All revisions are marked as ',
                 JX.$N('i', {
