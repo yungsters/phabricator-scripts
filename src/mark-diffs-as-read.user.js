@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Mark Diffs as Read
-// @version        0.4.1
+// @version        0.4.2
 // @description    Adds a "Mark as Read" toggle to diffs in Phabricator
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -270,7 +270,7 @@ injectJS(function(global) {
 
       var hideLinkNode =
         JX.$N('a', {
-          className: 'mll policy-link',
+          className: 'mll policy-link phabricatordefault-a',
           sigil: 'hide-link',
           meta: {
             isHidden: isHidden,
