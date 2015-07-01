@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Phabricator: Simple Differential
-// @version        0.2.0
+// @version        0.2.1
 // @description    Makes Differential... simpler.
 // @match          https://secure.phabricator.com/*
 // @match          https://phabricator.fb.com/*
@@ -73,6 +73,11 @@ injectStyles(
   '.phui-object-item-icon-label .glyph {' +
     'margin-top: -1px;' +
     'vertical-align: text-top;' +
+  '}' +
+  '.inline-land-button.inline-land-button a {' +
+    'margin-top: -3px;' +
+    'margin-right: 6px;' +
+    'line-height: 21px;' +
   '}'
 );
 
@@ -136,11 +141,29 @@ injectJS(function(global) {
     // Filter out the "Project" attribute.
     attributeList = attributeList.filter(function(attributeNode) {
       var maybeProject = attributeNode.lastChild;
-      if (maybeProject.nodeType === Node.TEXT_NODE) {
+      if (maybeProject &&
+          maybeProject.nodeType === Node.TEXT_NODE) {
         return !maybeProject.textContent.match(/^Project: /);
       }
       return true;
     });
+
+    // Filter out the "Land Button" attribute.
+    var landButton = null;
+    attributeList = attributeList.filter(function(attributeNode) {
+      var maybeLandButton = attributeNode.lastChild;
+      if (maybeLandButton &&
+          maybeLandButton.nodeName === 'SPAN' &&
+          maybeLandButton.className.match(/^land-button-/)) {
+        landButton = maybeLandButton;
+        return false;
+      }
+      return true;
+    });
+    if (landButton) {
+      JX.DOM.alterClass(landButton, 'inline-land-button', true);
+      JX.DOM.prependContent(nameNode, landButton);
+    }
 
     var pendingCommentNode = attributeList[attributeListIndex];
     var pendingCommentIconNode = $('.icons-file-grey', pendingCommentNode);
@@ -153,7 +176,8 @@ injectJS(function(global) {
     if (itemStatusNode) {
       // Sometimes the status node might have a spacer in it.
       var maybeItemStatus = itemStatusNode.lastChild;
-      if (maybeItemStatus.nodeType === Node.TEXT_NODE) {
+      if (maybeItemStatus &&
+          maybeItemStatus.nodeType === Node.TEXT_NODE) {
         itemStatus = maybeItemStatus.textContent;
         var statusColor = statusToColor[itemStatus];
         if (statusColor) {
